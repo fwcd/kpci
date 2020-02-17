@@ -3,6 +3,7 @@ module Subst where
 import Data.List (intercalate)
 import Pretty
 import Type
+import Vars
 
 data Subst = Subst [(VarName, Term)]
     deriving Show
@@ -25,9 +26,13 @@ restrictTo :: [VarName] -> Subst -> Subst
 restrictTo vs (Subst s) = Subst $ filter (flip elem vs . fst) s
 
 -- Creates a substitution by first applying the right and then the left one.
+-- TODO: Use a list comprehension for readability
 compose :: Subst -> Subst -> Subst
 compose (Subst s2) (Subst s1) = Subst $ map (\(v, t) -> (v, apply (Subst s2) t)) s1 ++ filter (not . (flip elem $ map fst s1) . fst) s2
 
 instance Pretty Subst where
     pretty (Subst s) = "{" ++ intercalate ", " (map prettyMapping s) ++ "}"
         where prettyMapping (v, t) = v ++ " -> " ++ pretty t
+
+instance Vars Subst where
+    allVars (Subst s) = (map fst s) ++ ((map snd s) >>= allVars)
