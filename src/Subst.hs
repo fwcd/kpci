@@ -1,5 +1,7 @@
 module Subst where
 
+import Data.List (intercalate)
+import Pretty
 import Type
 
 data Subst = Subst [(VarName, Term)]
@@ -17,3 +19,11 @@ single v t = Subst [(v, t)]
 apply :: Subst -> Term -> Term
 apply (Subst s) (Var v) = maybe (Var v) id $ lookup v s
 apply subst (Comb name ts) = Comb name $ map (apply subst) ts
+
+-- Creates a substitution by first applying the right and then the left one.
+compose :: Subst -> Subst -> Subst
+compose (Subst s2) (Subst s1) = Subst $ map (\(v, t) -> (v, apply (Subst s2) t)) s1 ++ s2
+
+instance Pretty Subst where
+    pretty (Subst s) = "{" ++ intercalate ", " (map prettyMapping s) ++ "}"
+        where prettyMapping (v, t) = v ++ " -> " ++ pretty t
