@@ -29,6 +29,8 @@ restrictTo vs (Subst s) = Subst $ filter (flip elem vs . fst) s
 -- TODO: Use a list comprehension for readability
 compose :: Subst -> Subst -> Subst
 compose (Subst s2) (Subst s1) = Subst $ map (\(v, t) -> (v, apply (Subst s2) t)) s1 ++ filter (not . (flip elem $ map fst s1) . fst) s2
+--compose (Subst s2) (Subst s1) = Subst [(v, apply (Subst s2) t) | (v, t) <- s1]
+--                                   ++ [(v, t)                  | (v, t) <- s2, not . elem v s1]
 
 instance Pretty Subst where
     pretty (Subst s) = "{" ++ intercalate ", " (map prettyMapping s) ++ "}"
