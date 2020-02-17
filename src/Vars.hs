@@ -3,6 +3,7 @@ module Vars where
 import Type
 
 class Vars a where
+    -- Extracts all variables from a term
     allVars :: a -> [VarName]
 
 instance Vars Term where
@@ -17,3 +18,7 @@ instance Vars Prog where
 
 instance Vars Goal where
     allVars (Goal ts) = ts >>= allVars
+
+-- An infinite supply of fresh, possible variables
+freshVars :: [VarName]
+freshVars = ["a", "b", "d", "e"] >>= (++ freshVars)
