@@ -21,4 +21,17 @@ instance Vars Goal where
 
 -- An infinite supply of fresh, possible variables
 freshVars :: [VarName]
-freshVars = ["a", "b", "d", "e"] >>= (++ freshVars)
+freshVars = filter isValid
+          $ filter (not . null)
+          $ allCombinations
+          $ lowers ++ uppers ++ numbers ++ "_"
+    where lowers = ['a' .. 'z']
+          uppers = ['A' .. 'Z']
+          numbers = ['1' .. '9']
+          isValid :: VarName -> Bool
+          isValid = (flip elem (uppers ++ "_")) . head
+
+-- Generates all possible finite non-empty combination lists.
+allCombinations :: [a] -> [[a]]
+allCombinations [] = [[]]
+allCombinations xs = [] : (allCombinations xs >>= \w -> map (:w) xs)
