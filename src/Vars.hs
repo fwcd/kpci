@@ -1,4 +1,4 @@
-module Vars where
+module Vars (Vars (..), freshVars) where
 
 import Type
 
