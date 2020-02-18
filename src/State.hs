@@ -1,4 +1,4 @@
-module State (State (..), runState, get) where
+module State (State (..), runState, get, set) where
 
 data State s a = State (s -> (a, s))
 
@@ -7,6 +7,9 @@ runState (State m) s = m s
 
 get :: State s s
 get = State $ \s -> (s, s)
+
+set :: s -> State s ()
+set s' = State $ \_ -> ((), s')
 
 instance Functor (State s) where
   -- fmap :: (a -> b) -> State s a -> State s b
