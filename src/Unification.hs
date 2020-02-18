@@ -1,4 +1,4 @@
-module Unification where
+module Unification (ds, unify) where
 
 import Data.Maybe (listToMaybe, maybeToList)
 import Subst
