@@ -3,6 +3,7 @@ module Unification where
 import Data.Maybe (listToMaybe, maybeToList)
 import Subst
 import Type
+import Vars
 
 -- Computes the disagreement set.
 ds :: Term -> Term -> Maybe (Term, Term)
@@ -21,9 +22,9 @@ unify :: Term -> Term -> Maybe Subst
 unify t1 t2 = case ds t1 t2 of
     Just (d1, d2) -> do
         s1 <- case (d1, d2) of
-                (Var x, _) -> Just $ single x d2
-                (_, Var x) -> Just $ single x d1
-                _          -> Nothing
+                (Var x, t) | not $ elem x $ allVars t -> Just $ single x d2
+                (t, Var x) | not $ elem x $ allVars t -> Just $ single x d1
+                _                                     -> Nothing
         s2 <- unify (apply s1 t1) (apply s1 t2)
         Just $ compose s1 s2
     Nothing       -> Just empty
