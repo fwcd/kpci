@@ -20,11 +20,11 @@ ds t1 t2 = case (t1, t2) of
 -- Unifies two terms.
 unify :: Term -> Term -> Maybe Subst
 unify t1 t2 = case ds t1 t2 of
-    Just (d1, d2) -> do
-        s1 <- case (d1, d2) of
-                (Var x, t) | not $ elem x $ allVars t -> Just $ single x d2
-                (t, Var x) | not $ elem x $ allVars t -> Just $ single x d1
-                _                                     -> Nothing
-        s2 <- unify (apply s1 t1) (apply s1 t2)
-        Just $ compose s1 s2
-    Nothing       -> Just empty
+  Just (d1, d2) -> do
+    s1 <- case (d1, d2) of
+            (Var x, t) | not $ elem x $ allVars t -> Just $ single x d2
+            (t, Var x) | not $ elem x $ allVars t -> Just $ single x d1
+            _                                     -> Nothing
+    s2 <- unify (apply s1 t1) (apply s1 t2)
+    Just $ compose s1 s2
+  Nothing       -> Just empty

@@ -6,7 +6,7 @@ import Type
 import Vars
 
 data Subst = Subst [(VarName, Term)]
-    deriving Show
+  deriving Show
 
 -- An empty substitution.
 empty :: Subst
@@ -31,8 +31,8 @@ compose (Subst s2) (Subst s1) = Subst $ [(v, apply (Subst s2) t) | (v, t) <- s1]
                                      ++ [(v, t)                  | (v, t) <- s2, not $ elem v $ map fst s1]
 
 instance Pretty Subst where
-    pretty (Subst s) = "{" ++ intercalate ", " (map prettyMapping s) ++ "}"
-        where prettyMapping (v, t) = v ++ " -> " ++ pretty t
+  pretty (Subst s) = "{" ++ intercalate ", " (map prettyMapping s) ++ "}"
+    where prettyMapping (v, t) = v ++ " -> " ++ pretty t
 
 instance Vars Subst where
-    allVars (Subst s) = (map fst s) ++ ((map snd s) >>= allVars)
+  allVars (Subst s) = (map fst s) ++ ((map snd s) >>= allVars)
