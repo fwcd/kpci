@@ -1,4 +1,4 @@
-module Rename where
+module Rename (rename) where
 
 import State
 import Subst
@@ -10,6 +10,7 @@ import Vars
 rename :: [VarName] -> Rule -> Rule
 rename used r = fst $ runState (renameInRule r) (filter (not . flip elem used) $ freshVars, used)
 
+-- Renames variables using unique variable names in a rule.
 renameInRule :: Rule -> State ([VarName], [VarName]) Rule
 renameInRule (Rule t ts) = do
     (fresh, used) <- get
@@ -24,6 +25,7 @@ renameInRule (Rule t ts) = do
 
     return $ Rule t' ts'
 
+-- Applies a substitution and renames anonymous variables in a term.
 renameApply :: Subst -> Term -> State ([VarName], [VarName]) Term
 renameApply s t = do
     t' <- renameAnonymous t
