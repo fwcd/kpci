@@ -7,8 +7,9 @@ import Vars
 
 -- Renames variables for SLD-resolution by renaming precisely those
 -- that occur in the given list.
-rename :: [VarName] -> Rule -> Rule
-rename used r = fst $ runState (renameInRule r) (filter (not . flip elem used) $ freshVars, used)
+rename :: [VarName] -> Rule -> (Rule, [VarName])
+rename used r = (r', used)
+    where (r', (_, used)) = runState (renameInRule r) (filter (not . flip elem used) $ freshVars, used)
 
 -- Renames variables using unique variable names in a rule.
 renameInRule :: Rule -> State ([VarName], [VarName]) Rule
