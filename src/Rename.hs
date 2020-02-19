@@ -8,8 +8,8 @@ import Vars
 -- Renames variables for SLD-resolution by renaming precisely those
 -- that occur in the given list.
 rename :: [VarName] -> Rule -> (Rule, [VarName])
-rename used r = (r', used)
-    where (r', (_, used)) = runState (renameInRule r) (filter (not . flip elem used) $ freshVars, used)
+rename used r = (r', used')
+    where (r', (_, used')) = runState (renameInRule r) (filter (not . flip elem used) $ freshVars, used)
 
 -- Renames variables using unique variable names in a rule.
 renameInRule :: Rule -> State ([VarName], [VarName]) Rule
@@ -19,7 +19,7 @@ renameInRule (Rule t ts) = do
     let vs = allVars t ++ (ts >>= allVars)
         (fs, fs') = splitAt (length vs) fresh
         s = Subst $ zip vs $ map Var fs
-    set (fs', used ++ fs)
+    put (fs', used ++ fs)
 
     t' <- renameApply s t
     ts' <- sequence $ map (renameApply s) ts
@@ -34,8 +34,8 @@ renameApply s t = do
 
 -- Renames all anonymous variables in a term.
 renameAnonymous :: Term -> State ([VarName], [VarName]) Term
-renameAnonymous (Var x) | x == "_"  = do ((v:vs), used) <- get
-                                         set (vs, v:used)
-                                         return $ Var v
+renameAnonymous (Var x) | x == "_"  = do (fresh, used) <- get
+                                         put (tail fresh, head(fresh):used)
+                                         return $ Var $ head fresh
                         | otherwise = return $ Var x
 renameAnonymous (Comb f ts) = fmap (Comb f) $ sequence $ map renameAnonymous ts
