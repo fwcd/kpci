@@ -1,5 +1,6 @@
 module REPL (runREPL) where
 
+import Data.List (intercalate)
 import Parser
 import Pretty
 import SLD
@@ -8,12 +9,13 @@ import System.IO (hFlush, stdout)
 import Type
 
 -- Holds state used by the interactive shell, e.g. the loaded program and the SLD resolution strategy.
-data REPLState = REPLState Prog (Maybe FilePath) Strategy
+-- If no strategy is provided, the SLD tree is output directly.
+data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
 
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
 runREPL = repl (Just "Welcome!\nType \":h\" for help.") st
-  where st = REPLState (Prog []) Nothing (const [])
+  where st = REPLState (Prog []) Nothing $ Just defaultStrategy
 
 -- Runs the REPL loop.
 repl :: Maybe String -> REPLState -> IO ()
@@ -33,9 +35,9 @@ repl msg st = do
 -- Evaluates an input.
 evaluate :: String -> REPLState -> IO REPLState
 evaluate input st = case input of
-  ""        -> return st
-  ':' : cmd -> evaluateCommand cmd st
-  _         -> do
+  ""               -> return st
+  ':' : cmd : args -> evaluateCommand cmd (trim args) st
+  _                -> do
     -- TODO: Implement a proper, interactive solution output
     case parse input of
       Left e -> putStrLn e
@@ -44,17 +46,28 @@ evaluate input st = case input of
     return st
 
 -- Evaluates a command prefixed with ':'.
-evaluateCommand :: String -> REPLState -> IO REPLState
-evaluateCommand cmd st = case cmd of
+evaluateCommand :: Char -> String -> REPLState -> IO REPLState
+evaluateCommand cmd args st = case cmd of
   -- TODO: Implement :h and others
-  'l' : path -> loadFile path st
-  "r" -> case p of
-      Just path -> loadFile path st
-      Nothing -> do
-        putStrLn "No file loaded yet!"
-        return st
-    where (REPLState _ p _) = st
-  "q" -> do
+  'l' -> loadFile args st
+  'r' -> case fp of
+    Just path -> loadFile path st
+    Nothing   -> do
+      putStrLn "No file loaded yet!"
+      return st
+    where (REPLState _ fp _) = st
+  's' | null args -> do
+        putStrLn "Successfully deselected strategy, subsequent queries will output the entire SLD tree"
+        return $ REPLState p fp Nothing
+      | otherwise -> case lookup args $ strategies of
+        Just strat -> do
+          putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
+          return $ REPLState p fp $ Just strat
+        Nothing    -> do
+          putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
+          return st
+    where (REPLState p fp _) = st
+  'q' -> do
     putStrLn "Goodbye!"
     exitSuccess
   _   -> return st
@@ -67,7 +80,12 @@ loadFile path st = do
     Left e -> do
       putStrLn e
       return st
-    Right p -> do
-      putStrLn "Success!"
+    Right p@(Prog rs) -> do
+      putStrLn $ "Successfully loaded " ++ show (length rs) ++ " rule(s)"
       return $ REPLState p (Just path) strat
       where (REPLState _ _ strat) = st
+
+-- Trims whitespace around a string.
+trim :: String -> String
+trim = f . f
+  where f = reverse . dropWhile (== ' ')
