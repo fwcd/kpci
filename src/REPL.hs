@@ -35,9 +35,13 @@ repl msg st = do
 -- Evaluates an input.
 evaluate :: String -> REPLState -> IO REPLState
 evaluate input st = case input of
-  ""               -> return st
-  ':' : cmd : args -> evaluateCommand cmd (trim args) st
-  _                -> do
+  ""           -> return st
+  ':':cmd:args -> case lookupCommand cmd commands of
+    Just f  -> f args st
+    Nothing -> do
+      putStrLn "No such command found, type \":h\" for help."
+      return st
+  _            -> do
     -- TODO: Implement a proper, interactive solution output
     case parse input of
       Left e -> putStrLn e
@@ -45,35 +49,27 @@ evaluate input st = case input of
         where (REPLState p _ _) = st
     return st
 
--- Evaluates a command prefixed with ':'.
-evaluateCommand :: Char -> String -> REPLState -> IO REPLState
-evaluateCommand cmd args st = case cmd of
-  -- TODO: Implement :h and others
-  'l' -> loadFile args st
-  'r' -> case fp of
-    Just path -> loadFile path st
-    Nothing   -> do
-      putStrLn "No file loaded yet!"
-      return st
-    where (REPLState _ fp _) = st
-  's' | null args -> do
-        putStrLn "Successfully deselected strategy, subsequent queries will output the entire SLD tree"
-        return $ REPLState p fp Nothing
-      | otherwise -> case lookup args $ strategies of
-        Just strat -> do
-          putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
-          return $ REPLState p fp $ Just strat
-        Nothing    -> do
-          putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
-          return st
-    where (REPLState p fp _) = st
-  'q' -> do
-    putStrLn "Goodbye!"
-    exitSuccess
-  _   -> return st
+-- A command that takes args and a state and returns a new state.
+type Command = String -> REPLState -> IO REPLState
+
+-- The default command registry.
+-- TODO: :h
+commands :: [(Char, String, String, Command)]
+commands = [('l', "<file>",  "Loads the specified file",           loadFile)
+           ,('r', "",        "Reloads the file",                   reloadFile)
+           ,('s', "<strat>", "Sets the specified search strategy", setStrat)
+           ,('q', "",        "Exits the interactive environment",  quit)
+           ,('h', "",        "Helps",                              help)
+           ]
+
+-- Finds a command in a list of commands.
+lookupCommand :: Char -> [(Char, String, String, Command)] -> Maybe Command
+lookupCommand cmd []                              = Nothing
+lookupCommand cmd ((cmd', _, _, f):cs) | cmd == cmd' = Just f
+                                       | otherwise   = lookupCommand cmd cs
 
 -- Loads a file into the interpreter.
-loadFile :: FilePath -> REPLState -> IO REPLState
+loadFile :: Command
 loadFile path st = do
   f <- parseFile path
   case f of
@@ -84,6 +80,42 @@ loadFile path st = do
       putStrLn $ "Successfully loaded " ++ show (length rs) ++ " rule(s)"
       return $ REPLState p (Just path) strat
       where (REPLState _ _ strat) = st
+
+-- Reloads the current file.
+reloadFile :: Command
+reloadFile _ st = case fp of
+                    Just path -> loadFile path st
+                    Nothing   -> do
+                      putStrLn "No file loaded yet!"
+                      return st
+  where (REPLState _ fp _) = st
+
+-- Selects a search strategy.
+setStrat :: Command
+setStrat args st | null args = do
+                   putStrLn "Successfully deselected strategy, subsequent queries will output the entire SLD tree"
+                   return $ REPLState p fp Nothing
+                 | otherwise = case lookup args $ strategies of
+                   Just strat -> do
+                     putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
+                     return $ REPLState p fp $ Just strat
+                   Nothing    -> do
+                     putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
+                     return st
+  where (REPLState p fp _) = st
+
+-- Exits the environment
+quit :: Command
+quit _ _ = do
+  putStrLn "Goodbye!"
+  exitSuccess
+
+-- Outputs the list of commands.
+help :: Command
+help _ st = do
+  putStrLn $ unlines $ "Commands available from the prompt" : map (("  " ++) . describe) commands
+  return st
+  where describe (cmd, argDesc, desc, _) = (':':cmd:' ':argDesc) ++ " " ++ desc
 
 -- Trims whitespace around a string.
 trim :: String -> String
