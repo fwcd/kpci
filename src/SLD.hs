@@ -20,10 +20,13 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
         sld' used (Goal g) = SLDTree (Goal g) $ do
           (ls1, l, ls2) <- splitEverywhere g
-          r <- prog
+          r  <- prog
           let (Rule t ts, used') = rename used r
-          s <- maybeToList $ unify l t
-          return (s, sld' used' $ Goal $ map (apply s) ts)
+          s  <- maybeToList $ unify l t
+          let ls = ls1 ++ ts ++ ls2
+          return (s, sld' used' ( Goal $ map (apply s) ls))
+          -- Was passiert wenn es keinen Unifikator gibt?
+          -- Der Rekursionsschritt wird doch immer gemacht.
 
 -- Splits a list at every position and returns for each split the
 -- prefix, the element and the postfix.
