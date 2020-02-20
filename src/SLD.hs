@@ -1,4 +1,4 @@
-module SLD where
+module SLD (SLDTree (..), Strategy, sld) where
 
 import Data.Maybe (maybeToList)
 import Pretty
