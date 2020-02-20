@@ -43,6 +43,20 @@ dfs = dfs' empty
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
         dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
 
+-- Performs a breadth-first search on the SLD tree
+bfs :: Strategy
+bfs t = bfs' [(empty,t)]
+  where bfs' :: [(Subst, SLDTree)] -> [Subst]
+        bfs' [(subst, SLDTree (Goal [])    [])]    = [subst]
+        bfs' [(_,     SLDTree (Goal (_:_)) [])]    = []
+        bfs' ((subst, SLDTree _            cs):ts) = bfs' (ts ++ (composemap subst cs))
+        composemap :: Subst -> [(Subst, SLDTree)] -> [(Subst, SLDTree)]
+        composemap s []                 = []
+        composemap s ((subst, tree):ts) = (compose subst s, tree): composemap s ts
+
+
+
+
 -- Maps strategy names to strategies.
 strategies :: [(String, Strategy)]
 strategies = [("dfs", dfs)]
