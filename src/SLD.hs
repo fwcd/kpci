@@ -19,13 +19,12 @@ type Strategy = SLDTree -> [Subst]
 sld :: Prog -> Goal -> SLDTree
 sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
-        sld' used (Goal g) = SLDTree (Goal g) $ do
-          (ls1, l, ls2) <- splitEverywhere g
-          r  <- prog
+        sld' used (Goal []) = SLDTree (Goal []) []
+        sld' used g@(Goal (l:ls)) = SLDTree g $ do
+          r <- prog
           let (Rule t ts, used') = rename used r
           s  <- maybeToList $ unify l t
-          let ls = ls1 ++ ts ++ ls2
-          return (s, sld' used' ( Goal $ map (apply s) ls))
+          return (s, sld' used' $ Goal $ map (apply s) $ ts ++ ls)
 
 -- Splits a list at every position and returns for each split the
 -- prefix, the element and the postfix.
