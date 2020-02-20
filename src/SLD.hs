@@ -19,11 +19,11 @@ type Strategy = SLDTree -> [Subst]
 sld :: Prog -> Goal -> SLDTree
 sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
-        sld' used (Goal []) = SLDTree (Goal []) []
+        sld' used   (Goal [])     = SLDTree (Goal []) []
         sld' used g@(Goal (l:ls)) = SLDTree g $ do
           r <- prog
           let (Rule t ts, used') = rename used r
-          s  <- maybeToList $ unify l t
+          s <- maybeToList $ unify l t
           return (s, sld' used' $ Goal $ map (apply s) $ ts ++ ls)
 
 instance Pretty SLDTree where
@@ -34,6 +34,7 @@ instance Pretty SLDTree where
           prettyChild (s, t) = (arr ++ pretty s) : (map ((flip replicate ' ' $ length arr) ++) $ pretty' t)
             where arr = "=> "
 
+-- TODO: Not working yet
 -- Performs a depth-first search on the SLD tree.
 dfs :: Strategy
 dfs = dfs' empty
@@ -43,6 +44,7 @@ dfs = dfs' empty
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
         dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
 
+-- TODO: Not working yet
 -- Performs a breadth-first search on the SLD tree
 bfs :: Strategy
 bfs t = bfs' [(empty,t)]
