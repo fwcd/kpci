@@ -5,13 +5,11 @@ bool(false).
 % Definition of logical AND.
 and(true, true, true).
 and(true, false, false).
-and(false, true, false).
-and(false, false, false).
+and(false, _, false).
 
 % Definition of logical OR.
-or(true, true, true).
-or(true, false, true).
-or(false, true, true).
+or(true, _, true).
+or(_, true, true).
 or(false, false, false).
 
 % Definition of logical NOT.
