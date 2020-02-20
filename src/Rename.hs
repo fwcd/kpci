@@ -14,7 +14,7 @@ rename used r = (r', used')
 -- Renames variables using unique variable names in a rule.
 renameInRule :: Rule -> State (Int, [VarName]) Rule
 renameInRule (Rule t ts) = do
-    let vs = allVars t ++ (ts >>= allVars)
+    let vs = filter (/= "_") $ allVars t ++ (ts >>= allVars)
     vs' <- sequence $ map renameVarName vs
 
     let s = Subst $ zip vs $ map Var vs'
@@ -31,7 +31,7 @@ renameApply s t = do
 
 -- Renames all anonymous variables in a term.
 renameAnonymous :: Term -> State (Int, [VarName]) Term
-renameAnonymous (Var s) | s == "_"  = fmap Var $ renameVarName s
+renameAnonymous (Var s) | s == "_"  = fmap Var $ renameVarName "Anon"
                         | otherwise = return $ Var s
 renameAnonymous (Comb f ts) = fmap (Comb f) $ sequence $ map renameAnonymous ts
 
@@ -46,9 +46,3 @@ renameVarName s = do
         renameVarName' s' i used' | elem s'' used' = renameVarName' s' (i + 1) used'
                                   | otherwise      = s''
           where s'' = s' ++ show i
-
--- The beginning of the list and the longest suffix
--- of elements satisfying the predicate.
-spanEnd :: (a -> Bool) -> [a] -> ([a], [a])
-spanEnd f xs = reverseResult $ span f $ reverse xs
-  where reverseResult (p, s) = (reverse s, reverse p)
