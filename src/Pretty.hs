@@ -16,3 +16,9 @@ instance Pretty Term where
           prettyRecursive t t'                = pretty t ++ "|" ++ pretty t'
   pretty (Comb name []) = name
   pretty (Comb name ts) = name ++ "(" ++ (intercalate ", " (map pretty ts)) ++ ")"
+
+instance Pretty Rule where
+  pretty (Rule t ts) = (pretty t) ++ " :- " ++ (intercalate ", " (map pretty ts)) ++ "."
+  
+instance Pretty Goal where
+  pretty (Goal ts) = (intercalate ", " $ map pretty ts) ++ "."
