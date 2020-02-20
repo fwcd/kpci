@@ -25,8 +25,6 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
           s  <- maybeToList $ unify l t
           let ls = ls1 ++ ts ++ ls2
           return (s, sld' used' ( Goal $ map (apply s) ls))
-          -- Was passiert wenn es keinen Unifikator gibt?
-          -- Der Rekursionsschritt wird doch immer gemacht.
 
 -- Splits a list at every position and returns for each split the
 -- prefix, the element and the postfix.
