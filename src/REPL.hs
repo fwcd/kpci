@@ -36,7 +36,7 @@ repl msg st = do
 evaluate :: String -> REPLState -> IO REPLState
 evaluate input st = case input of
   ""           -> return st
-  ':':cmd:args -> evaluateCommand cmd args st
+  ':':cmd:args -> evaluateCommand cmd (trim args) st
   _            -> evaluateGoal input st
 
 -- Evaluates a command.
