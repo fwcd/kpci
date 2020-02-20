@@ -1,4 +1,4 @@
-module SLD (SLDTree (..), Strategy, sld) where
+module SLD (SLDTree (..), Strategy, sld, dfs, solve) where
 
 import Data.Maybe (maybeToList)
 import Pretty
@@ -26,12 +26,6 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
           s  <- maybeToList $ unify l t
           return (s, sld' used' $ Goal $ map (apply s) $ ts ++ ls)
 
--- Splits a list at every position and returns for each split the
--- prefix, the element and the postfix.
-splitEverywhere :: [a] -> [([a], a, [a])]
-splitEverywhere [] = []
-splitEverywhere (x:xs) = ([], x, xs) : map (\(ws, y, zs) -> (x:ws, y, zs)) (splitEverywhere xs)
-
 instance Pretty SLDTree where
   pretty t = unlines $ pretty' t
     where pretty' :: SLDTree -> [String]
@@ -39,3 +33,17 @@ instance Pretty SLDTree where
           prettyChild :: (Subst, SLDTree) -> [String]
           prettyChild (s, t) = (arr ++ pretty s) : (map ((flip replicate ' ' $ length arr) ++) $ pretty' t)
             where arr = "=> "
+
+-- Performs a depth-first search on the SLD tree.
+dfs :: Strategy
+dfs = dfs' empty
+  where dfs' :: Subst -> Strategy
+        dfs' s (SLDTree (Goal (_:_)) []) = []
+        dfs' s (SLDTree _ cs) = cs >>= (dfsChild s)
+        dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
+        dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
+
+-- Solves a goal using a program and a strategy.
+solve :: Strategy -> Prog -> Goal -> [Subst]
+solve strat p g@(Goal ls) = map (\(Subst subs) -> Subst $ filter (flip elem vs . fst) subs) $ strat $ sld p g
+  where vs = ls >>= allVars
