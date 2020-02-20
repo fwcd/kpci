@@ -1,6 +1,7 @@
 module SLD where
 
 import Data.Maybe (maybeToList)
+import Pretty
 import Rename
 import Subst
 import Type
@@ -31,3 +32,10 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
 splitEverywhere :: [a] -> [([a], a, [a])]
 splitEverywhere [] = []
 splitEverywhere (x:xs) = ([], x, xs) : map (\(ws, y, zs) -> (x:ws, y, zs)) (splitEverywhere xs)
+
+instance Pretty SLDTree where
+  pretty t = unlines $ pretty' t
+    where pretty' :: SLDTree -> [String]
+          pretty' (SLDTree g cs) = show g : (map ("  " ++) $ cs >>= prettyChild)
+          prettyChild :: (Subst, SLDTree) -> [String]
+          prettyChild (s, t) = ("-> " ++ pretty s) : pretty' t
