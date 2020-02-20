@@ -9,12 +9,13 @@ import System.IO (hFlush, stdout)
 import Type
 
 -- Holds state used by the interactive shell, e.g. the loaded program and the SLD resolution strategy.
-data REPLState = REPLState Prog (Maybe FilePath) Strategy
+-- If no strategy is provided, the SLD tree is output directly.
+data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
 
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
 runREPL = repl (Just "Welcome!\nType \":h\" for help.") st
-  where st = REPLState (Prog []) Nothing (const [])
+  where st = REPLState (Prog []) Nothing $ Just defaultStrategy
 
 -- Runs the REPL loop.
 repl :: Maybe String -> REPLState -> IO ()
@@ -55,13 +56,16 @@ evaluateCommand cmd args st = case cmd of
       putStrLn "No file loaded yet!"
       return st
     where (REPLState _ fp _) = st
-  's' -> case lookup args $ strategies of
-      Just strat -> do
-        putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
-        return $ REPLState p fp strat
-      Nothing    -> do
-        putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
-        return st
+  's' | null args -> do
+        putStrLn "Successfully deselected strategy, subsequent queries will output the entire SLD tree"
+        return $ REPLState p fp Nothing
+      | otherwise -> case lookup args $ strategies of
+        Just strat -> do
+          putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
+          return $ REPLState p fp $ Just strat
+        Nothing    -> do
+          putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
+          return st
     where (REPLState p fp _) = st
   'q' -> do
     putStrLn "Goodbye!"

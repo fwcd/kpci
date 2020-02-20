@@ -1,4 +1,4 @@
-module SLD (SLDTree (..), Strategy, sld, strategies, solve) where
+module SLD (SLDTree (..), Strategy, sld, strategies, defaultStrategy, solve) where
 
 import Data.Maybe (maybeToList)
 import Pretty
@@ -46,6 +46,10 @@ dfs = dfs' empty
 -- Maps strategy names to strategies.
 strategies :: [(String, Strategy)]
 strategies = [("dfs", dfs)]
+
+-- A default strategy.
+defaultStrategy :: Strategy
+defaultStrategy = dfs
 
 -- Solves a goal using a program and a strategy.
 solve :: Strategy -> Prog -> Goal -> [Subst]
