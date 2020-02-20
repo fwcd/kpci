@@ -36,6 +36,7 @@ splitEverywhere (x:xs) = ([], x, xs) : map (\(ws, y, zs) -> (x:ws, y, zs)) (spli
 instance Pretty SLDTree where
   pretty t = unlines $ pretty' t
     where pretty' :: SLDTree -> [String]
-          pretty' (SLDTree g cs) = show g : (map ("  " ++) $ cs >>= prettyChild)
+          pretty' (SLDTree g cs) = pretty g : (map ("  " ++) $ cs >>= prettyChild)
           prettyChild :: (Subst, SLDTree) -> [String]
-          prettyChild (s, t) = ("-> " ++ pretty s) : pretty' t
+          prettyChild (s, t) = (arr ++ pretty s) : (map ((flip replicate ' ' $ length arr) ++) $ pretty' t)
+            where arr = "=> "
