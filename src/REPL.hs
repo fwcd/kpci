@@ -36,18 +36,27 @@ repl msg st = do
 evaluate :: String -> REPLState -> IO REPLState
 evaluate input st = case input of
   ""           -> return st
-  ':':cmd:args -> case lookupCommand cmd commands of
-    Just f  -> f args st
-    Nothing -> do
-      putStrLn "No such command found, type \":h\" for help."
-      return st
-  _            -> do
-    -- TODO: Implement a proper, interactive solution output
-    case parse input of
-      Left e -> putStrLn e
-      Right g -> putStrLn $ pretty $ sld p g
-        where (REPLState p _ _) = st
-    return st
+  ':':cmd:args -> evaluateCommand cmd args st
+  _            -> evaluateGoal input st
+
+-- Evaluates a command.
+evaluateCommand :: Char -> String -> REPLState -> IO REPLState
+evaluateCommand cmd args st = case lookupCommand cmd commands of
+                                Just f  -> f args st
+                                Nothing -> do
+                                  putStrLn "No such command found, type \":h\" for help."
+                                  return st
+
+-- Evaluates a goal, either by printing the SLD tree or the final substitutions,
+-- depending on the strategy.
+evaluateGoal :: String -> REPLState -> IO REPLState
+evaluateGoal input st = do case parse input of
+                             Left e -> putStrLn e
+                             Right g -> case strat of
+                               Just s  -> putStrLn $ unlines $ map pretty $ solve s p g
+                               Nothing -> putStrLn $ pretty $ sld p g
+                           return st
+  where (REPLState p _ strat) = st
 
 -- A command that takes args and a state and returns a new state.
 type Command = String -> REPLState -> IO REPLState
