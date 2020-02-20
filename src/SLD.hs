@@ -1,4 +1,4 @@
-module SLD (SLDTree (..), Strategy, sld, dfs, solve) where
+module SLD (SLDTree (..), Strategy, sld, strategies, solve) where
 
 import Data.Maybe (maybeToList)
 import Pretty
@@ -42,6 +42,10 @@ dfs = dfs' empty
         dfs' s (SLDTree _ cs) = cs >>= (dfsChild s)
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
         dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
+
+-- Maps strategy names to strategies.
+strategies :: [(String, Strategy)]
+strategies = [("dfs", dfs)]
 
 -- Solves a goal using a program and a strategy.
 solve :: Strategy -> Prog -> Goal -> [Subst]
