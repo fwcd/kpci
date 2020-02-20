@@ -59,7 +59,7 @@ bfs t = bfs' [(empty,t)]
 
 -- Maps strategy names to strategies.
 strategies :: [(String, Strategy)]
-strategies = [("dfs", dfs)]
+strategies = [("dfs", dfs), ("bfs", bfs)]
 
 -- A default strategy.
 defaultStrategy :: Strategy
