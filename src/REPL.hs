@@ -1,5 +1,6 @@
 module REPL (runREPL) where
 
+import Data.List (intercalate)
 import Parser
 import Pretty
 import SLD
@@ -33,9 +34,9 @@ repl msg st = do
 -- Evaluates an input.
 evaluate :: String -> REPLState -> IO REPLState
 evaluate input st = case input of
-  ""        -> return st
-  ':' : cmd -> evaluateCommand cmd st
-  _         -> do
+  ""               -> return st
+  ':' : cmd : args -> evaluateCommand cmd (trim args) st
+  _                -> do
     -- TODO: Implement a proper, interactive solution output
     case parse input of
       Left e -> putStrLn e
@@ -44,17 +45,25 @@ evaluate input st = case input of
     return st
 
 -- Evaluates a command prefixed with ':'.
-evaluateCommand :: String -> REPLState -> IO REPLState
-evaluateCommand cmd st = case cmd of
+evaluateCommand :: Char -> String -> REPLState -> IO REPLState
+evaluateCommand cmd args st = case cmd of
   -- TODO: Implement :h and others
-  'l' : path -> loadFile path st
-  "r" -> case p of
-      Just path -> loadFile path st
-      Nothing -> do
-        putStrLn "No file loaded yet!"
+  'l' -> loadFile args st
+  'r' -> case fp of
+    Just path -> loadFile path st
+    Nothing   -> do
+      putStrLn "No file loaded yet!"
+      return st
+    where (REPLState _ fp _) = st
+  's' -> case lookup args $ strategies of
+      Just strat -> do
+        putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
+        return $ REPLState p fp strat
+      Nothing    -> do
+        putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
         return st
-    where (REPLState _ p _) = st
-  "q" -> do
+    where (REPLState p fp _) = st
+  'q' -> do
     putStrLn "Goodbye!"
     exitSuccess
   _   -> return st
@@ -67,7 +76,12 @@ loadFile path st = do
     Left e -> do
       putStrLn e
       return st
-    Right p -> do
-      putStrLn "Success!"
+    Right p@(Prog rs) -> do
+      putStrLn $ "Successfully loaded " ++ show (length rs) ++ " rule(s)"
       return $ REPLState p (Just path) strat
       where (REPLState _ _ strat) = st
+
+-- Trims whitespace around a string.
+trim :: String -> String
+trim = f . f
+  where f = reverse . dropWhile (== ' ')
