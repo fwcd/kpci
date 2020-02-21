@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 module REPL (runREPL) where
 
 import Control.Monad.Trans (liftIO)
@@ -9,13 +10,23 @@ import System.Exit
 import System.Console.Haskeline
 import Type
 
+import Paths_kpci
+
 -- Holds state used by the interactive shell, e.g. the loaded program and the SLD resolution strategy.
 -- If no strategy is provided, the SLD tree is output directly.
 data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
 
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
-runREPL = putStrLn "Welcome!\nType \":h\" for help." >> repl st
+runREPL = do
+  asciiArtPath <- getDataFileName "resources/kpcilogo.txt"
+  asciiArt <- readFile asciiArtPath
+
+  let welcomeMsg = unlines $ (lines asciiArt) ++ ["", "Welcome!", "Type \":h\" for help."]
+  putStrLn welcomeMsg
+
+  repl st
+
   where st = REPLState (Prog []) Nothing $ Just defaultStrategy
 
 {-
