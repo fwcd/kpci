@@ -8,8 +8,10 @@ import Vars
 -- Computes the disagreement set.
 ds :: Term -> Term -> Maybe (Term, Term)
 ds t1 t2 = case (t1, t2) of
-                (Var x, Var y) | x /= y && x /= "_" && y /= "_" -> Just (t1, t2)
-                               | otherwise                      -> Nothing
+                (Var "_", _) -> Nothing
+                (_, Var "_") -> Nothing
+                (Var x, Var y) | x /= y    -> Just (t1, t2)
+                               | otherwise -> Nothing
                 (Var _, Comb _ _) -> Just (t1, t2)
                 (Comb _ _, Var _) -> Just (t1, t2)
                 (Comb f ts1, Comb g ts2) | f /= g || n /= m -> Just (t1, t2)
