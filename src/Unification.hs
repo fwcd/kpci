@@ -1,6 +1,6 @@
 module Unification (ds, unify) where
 
-import Data.Maybe (listToMaybe, maybeToList)
+import Control.Monad (msum)
 import Subst
 import Type
 import Vars
@@ -15,7 +15,7 @@ ds t1 t2 = case (t1, t2) of
                 (Var _, Comb _ _) -> Just (t1, t2)
                 (Comb _ _, Var _) -> Just (t1, t2)
                 (Comb f ts1, Comb g ts2) | f /= g || n /= m -> Just (t1, t2)
-                                         | otherwise        -> listToMaybe $ (zip ts1 ts2) >>= (maybeToList . uncurry ds)
+                                         | otherwise        -> msum $ zipWith ds ts1 ts2
                     where n = length ts1
                           m = length ts2
 
