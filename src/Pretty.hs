@@ -22,3 +22,10 @@ instance Pretty Rule where
   
 instance Pretty Goal where
   pretty (Goal ts) = (intercalate ", " $ map pretty ts) ++ "."
+
+{-
+intercalate :: [a] -> [[a]] -> [a]
+intercalate _   []     = []
+intercalate _   [xs]   = xs
+intercalate sep (l:ls) = l ++ sep ++ intercalate sep ls
+-}

@@ -62,7 +62,6 @@ evaluateGoal input st = do case parse input of
 type Command = String -> REPLState -> IO REPLState
 
 -- The default command registry.
--- TODO: :h
 commands :: [(Char, String, String, Command)]
 commands = [('l', "<file>",  "Loads the specified file",           loadFile)
            ,('r', "",        "Reloads the file",                   reloadFile)

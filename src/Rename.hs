@@ -9,25 +9,25 @@ import Vars
 -- that occur in the given list.
 rename :: [VarName] -> Rule -> (Rule, [VarName])
 rename used r = (r', used')
-    where (r', (_, used')) = runState (renameInRule r) (1, used)
+  where (r', (_, used')) = runState (renameInRule r) (1, used)
 
 -- Renames variables using unique variable names in a rule.
 renameInRule :: Rule -> State (Int, [VarName]) Rule
 renameInRule (Rule t ts) = do
-    let vs = filter (/= "_") $ allVars t ++ (ts >>= allVars)
-    vs' <- sequence $ map renameVarName vs
+  let vs = filter (/= "_") $ allVars t ++ (ts >>= allVars)
+  vs' <- sequence $ map renameVarName vs
 
-    let s = Subst $ zip vs $ map Var vs'
-    t' <- renameApply s t
-    ts' <- sequence $ map (renameApply s) ts
+  let s = Subst $ zip vs $ map Var vs'
+  t' <- renameApply s t
+  ts' <- sequence $ map (renameApply s) ts
 
-    return $ Rule t' ts'
+  return $ Rule t' ts'
 
 -- Applies a substitution and renames anonymous variables in a term.
 renameApply :: Subst -> Term -> State (Int, [VarName]) Term
 renameApply s t = do
-    t' <- renameAnonymous t
-    return $ apply s t'
+  t' <- renameAnonymous t
+  return $ apply s t'
 
 -- Renames all anonymous variables in a term.
 renameAnonymous :: Term -> State (Int, [VarName]) Term
