@@ -7,7 +7,6 @@ import Pretty
 import SLD
 import System.Exit
 import System.Console.Haskeline
-import System.IO (hFlush, stdout)
 import Type
 
 -- Holds state used by the interactive shell, e.g. the loaded program and the SLD resolution strategy.
@@ -83,7 +82,7 @@ commands = [('l', "<file>",  "Loads the specified file",           loadFile)
 
 -- Finds a command in a list of commands.
 lookupCommand :: Char -> [(Char, String, String, Command)] -> Maybe Command
-lookupCommand cmd []                              = Nothing
+lookupCommand _ []                                   = Nothing
 lookupCommand cmd ((cmd', _, _, f):cs) | cmd == cmd' = Just f
                                        | otherwise   = lookupCommand cmd cs
 

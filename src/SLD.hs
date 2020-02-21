@@ -19,7 +19,7 @@ type Strategy = SLDTree -> [Subst]
 sld :: Prog -> Goal -> SLDTree
 sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
-        sld' used   (Goal [])     = SLDTree (Goal []) []
+        sld' _      (Goal [])     = SLDTree (Goal []) []
         sld' used g@(Goal (l:ls)) = SLDTree g $ do
           r <- prog
           let (Rule t ts, used') = rename used r
@@ -27,7 +27,7 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
           return (s, sld' used' $ Goal $ map (apply s) $ ts ++ ls)
 
 instance Pretty SLDTree where
-  pretty t = unlines $ pretty' t
+  pretty = unlines . pretty'
     where pretty' :: SLDTree -> [String]
           pretty' (SLDTree g cs) = pretty g : (map ("  " ++) $ cs >>= prettyChild)
           prettyChild :: (Subst, SLDTree) -> [String]
@@ -39,7 +39,7 @@ dfs :: Strategy
 dfs = dfs' empty
   where dfs' :: Subst -> Strategy
         dfs' s (SLDTree (Goal [])    []) = [s]
-        dfs' s (SLDTree (Goal (_:_)) []) = []
+        dfs' _ (SLDTree (Goal (_:_)) []) = []
         dfs' s (SLDTree _ cs) = cs >>= (dfsChild s)
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
         dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
@@ -54,7 +54,7 @@ bfs t = bfs' [(empty,t)]
                       ([], []) -> [subst]
                       _        -> []
         composeMap :: Subst -> [(Subst, SLDTree)] -> [(Subst, SLDTree)]
-        composeMap s []                 = []
+        composeMap _ []                 = []
         composeMap s ((subst, tree):ts) = (compose subst s, tree): composeMap s ts
 
 
