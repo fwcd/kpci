@@ -1,10 +1,12 @@
 module REPL (runREPL) where
 
+import Control.Monad.Trans (liftIO)
 import Data.List (intercalate)
 import Parser
 import Pretty
 import SLD
 import System.Exit
+import System.Console.Haskeline
 import System.IO (hFlush, stdout)
 import Type
 
@@ -14,23 +16,32 @@ data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
 
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
-runREPL = repl (Just "Welcome!\nType \":h\" for help.") st
+runREPL = putStrLn "Welcome!\nType \":h\" for help." >> repl st
   where st = REPLState (Prog []) Nothing $ Just defaultStrategy
 
+{-
 -- Runs the REPL loop.
-repl :: Maybe String -> REPLState -> IO ()
-repl msg st = do
-  case msg of
-    Just m -> putStrLn m
-    Nothing -> return ()
-
+repl :: REPLState -> IO ()
+repl st = do
   putStr "?- "
   hFlush stdout
 
   line <- getLine
   st' <- evaluate line st
 
-  repl Nothing st'
+  repl st'
+-}
+
+-- Runs the REPL loop.
+repl :: REPLState -> IO ()
+repl = runInputT defaultSettings . repl'
+    where repl' st = do
+                      line <- getInputLine "?- "
+                      case line of
+                        Just l -> do
+                          st' <- liftIO $ evaluate l st
+                          repl' st'
+                        Nothing -> repl' st
 
 -- Evaluates an input.
 evaluate :: String -> REPLState -> IO REPLState

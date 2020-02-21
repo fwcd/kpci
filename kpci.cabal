@@ -18,6 +18,6 @@ executable kpci
   main-is:             Main.hs
   other-modules:       Parser, Pretty, REPL, Rename, SLD, State, Subst, Type, Unification, Vars
   -- other-extensions:
-  build-depends:       base >= 4.9 && < 5, parsec < 3.2
+  build-depends:       base >= 4.9 && < 5, parsec < 3.2, haskeline < 0.9, mtl < 2.3
   hs-source-dirs:      src
   default-language:    Haskell2010
