@@ -39,6 +39,7 @@ instance Pretty SLDTree where
 dfs :: Strategy
 dfs = dfs' empty
   where dfs' :: Subst -> Strategy
+        dfs' s (SLDTree (Goal [])    []) = [s]
         dfs' s (SLDTree (Goal (_:_)) []) = []
         dfs' s (SLDTree _ cs) = cs >>= (dfsChild s)
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
