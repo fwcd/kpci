@@ -34,27 +34,28 @@ instance Pretty SLDTree where
           prettyChild (s, t) = (arr ++ pretty s) : (map ((flip replicate ' ' $ length arr) ++) $ pretty' t)
             where arr = "=> "
 
--- TODO: Not working yet
 -- Performs a depth-first search on the SLD tree.
 dfs :: Strategy
 dfs = dfs' empty
   where dfs' :: Subst -> Strategy
+        dfs' s (SLDTree (Goal [])    []) = [s]
         dfs' s (SLDTree (Goal (_:_)) []) = []
         dfs' s (SLDTree _ cs) = cs >>= (dfsChild s)
         dfsChild :: Subst -> (Subst, SLDTree) -> [Subst]
         dfsChild s1 (s2, t) = dfs' (compose s2 s1) t
 
--- TODO: Not working yet
 -- Performs a breadth-first search on the SLD tree
 bfs :: Strategy
 bfs t = bfs' [(empty,t)]
   where bfs' :: [(Subst, SLDTree)] -> [Subst]
-        bfs' [(subst, SLDTree (Goal [])    [])]    = [subst]
-        bfs' [(_,     SLDTree (Goal (_:_)) [])]    = []
-        bfs' ((subst, SLDTree _            cs):ts) = bfs' (ts ++ (composemap subst cs))
-        composemap :: Subst -> [(Subst, SLDTree)] -> [(Subst, SLDTree)]
-        composemap s []                 = []
-        composemap s ((subst, tree):ts) = (compose subst s, tree): composemap s ts
+        bfs' []                                = []
+        bfs' ((subst, SLDTree (Goal g) cs):ts) = s ++ bfs' (ts ++ (composeMap subst cs))
+          where s = case (g, cs) of
+                      ([], []) -> [subst]
+                      _        -> []
+        composeMap :: Subst -> [(Subst, SLDTree)] -> [(Subst, SLDTree)]
+        composeMap s []                 = []
+        composeMap s ((subst, tree):ts) = (compose subst s, tree): composeMap s ts
 
 
 
