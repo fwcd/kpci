@@ -39,6 +39,7 @@ localizeDE str = case str of
   "stratnotav" -> "Gewünschte Strategie ist nicht verfügbar! Verfügbare Strategien: "
   "goodbye"    -> "Auf Wiedersehen!"
   "cmdsav"     -> "Verfügbare Befehle"
+  "langnotfound" -> "Sprache wurde nicht gefunden."
   _            -> str
 
 localizeES :: String -> String
@@ -54,6 +55,7 @@ localizeES str = case str of
   "stratnotav" -> "La estrategia deseada no es disponible! Estrategias disponibles: "
   "goodbye"    -> "Adios!"
   "cmdsav"     -> "Instrucciónes disponibles"
+  "langnotfound" -> "No hay esta lingua."
   _            -> str
 
 localizePD :: String -> String
@@ -69,6 +71,7 @@ localizePD str = case str of
   "stratnotav" -> "Dat gifft disse Vörgahn nich! Paraate Vörgahn: "
   "goodbye"    -> "Tschüüs!"
   "cmdsav"     -> "Paraate Anwiesen"
+  "langnotfound" -> "Dat gifft disse Sprook nich."
   _            -> str
 
 localizeSE :: String -> String
