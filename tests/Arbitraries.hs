@@ -1,4 +1,4 @@
-module Arbitraries where
+module Arbitraries () where
 
 import Test.QuickCheck
 
@@ -13,7 +13,7 @@ instance Arbitrary Term where
     ts <- sequence [arbitrary | _ <- [1..k]]
     return $ if n == 0
                then Comb name ts
-               else Var name 
+               else Var name
 
 instance Arbitrary Subst where
   arbitrary = do
