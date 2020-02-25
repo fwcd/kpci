@@ -16,13 +16,14 @@ import Paths_kpci
 -- If no strategy is provided, the SLD tree is output directly.
 data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
 
+
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
 runREPL = do
   asciiArtPath <- getDataFileName "resources/kpcilogo.txt"
   asciiArt <- readFile asciiArtPath
 
-  let welcomeMsg = unlines $ (lines asciiArt) ++ ["", "Welcome!", "Type \":h\" for help."]
+  let welcomeMsg = unlines $ (lines asciiArt) ++ ["", "KIEL PROLOG COMPILER INTERACTIVE", "", "Welcome!", "Type \":h\" for help."]
   putStrLn welcomeMsg
 
   repl st
