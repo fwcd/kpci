@@ -3,6 +3,7 @@ module REPL (runREPL) where
 
 import Control.Monad.Trans (liftIO)
 import Data.List (intercalate)
+import Lang
 import Parser
 import Pretty
 import SLD
@@ -14,8 +15,7 @@ import Paths_kpci
 
 -- Holds state used by the interactive shell, e.g. the loaded program and the SLD resolution strategy.
 -- If no strategy is provided, the SLD tree is output directly.
-data REPLState = REPLState Prog (Maybe FilePath) (Maybe Strategy)
-
+data REPLState = REPLState Lang Prog (Maybe FilePath) (Maybe Strategy)
 
 -- Runs an interactive Prolog shell.
 runREPL :: IO ()
@@ -23,12 +23,13 @@ runREPL = do
   asciiArtPath <- getDataFileName "resources/kpcilogo.txt"
   asciiArt <- readFile asciiArtPath
 
-  let welcomeMsg = unlines $ (lines asciiArt) ++ ["", "KIEL PROLOG COMPILER INTERACTIVE", "", "Welcome!", "Type \":h\" for help."]
+  let welcomeMsg = unlines $ (lines asciiArt) ++ ["", "KIEL PROLOG COMPILER INTERACTIVE", "", localize lang "welcome", localize lang "helpAnno"]
   putStrLn welcomeMsg
 
   repl st
 
-  where st = REPLState (Prog []) Nothing $ Just defaultStrategy
+  where lang = EN
+        st = REPLState lang (Prog []) Nothing $ Just defaultStrategy
 
 {-
 -- Runs the REPL loop.
@@ -66,8 +67,9 @@ evaluateCommand :: Char -> String -> REPLState -> IO REPLState
 evaluateCommand cmd args st = case lookupCommand cmd commands of
                                 Just f  -> f args st
                                 Nothing -> do
-                                  putStrLn "No such command found, type \":h\" for help."
+                                  putStrLn $ localize lang "unknowncmd"
                                   return st
+  where (REPLState lang _ _ _) = st
 
 -- Evaluates a goal, either by printing the SLD tree or the final substitutions,
 -- depending on the strategy.
@@ -78,7 +80,7 @@ evaluateGoal input st = do case parse input of
                                Just s  -> putStrLn $ unlines $ map pretty $ solve s p g
                                Nothing -> putStrLn $ pretty $ sld p g
                            return st
-  where (REPLState p _ strat) = st
+  where (REPLState _ p _ strat) = st
 
 -- A command that takes args and a state and returns a new state.
 type Command = String -> REPLState -> IO REPLState
@@ -107,45 +109,47 @@ loadFile path st = do
       putStrLn e
       return st
     Right p@(Prog rs) -> do
-      putStrLn $ "Successfully loaded " ++ show (length rs) ++ " rule(s)"
-      return $ REPLState p (Just path) strat
-      where (REPLState _ _ strat) = st
+      putStrLn $ localize lang "loaded" ++ show (length rs) ++ localize lang "rule"
+      return $ REPLState lang p (Just path) strat
+      where (REPLState lang _ _ strat) = st
 
 -- Reloads the current file.
 reloadFile :: Command
 reloadFile _ st = case fp of
                     Just path -> loadFile path st
                     Nothing   -> do
-                      putStrLn "No file loaded yet!"
+                      putStrLn $ localize lang "nofile"
                       return st
-  where (REPLState _ fp _) = st
+  where (REPLState lang _ fp _) = st
 
 -- Selects a search strategy.
 setStrat :: Command
 setStrat args st | null args = do
-                   putStrLn "Successfully deselected strategy, subsequent queries will output the entire SLD tree"
-                   return $ REPLState p fp Nothing
+                   putStrLn $ localize lang "nostrat"
+                   return $ REPLState lang p fp Nothing
                  | otherwise = case lookup args $ strategies of
                    Just strat -> do
-                     putStrLn $ "Successfully selected strategy '" ++ args ++ "'"
-                     return $ REPLState p fp $ Just strat
+                     putStrLn $ localize lang "strat" ++ args
+                     return $ REPLState lang p fp $ Just strat
                    Nothing    -> do
-                     putStrLn $ "No such strategy available! Try one of these: " ++ intercalate ", " (map fst $ strategies)
+                     putStrLn $ localize lang "stratnotav" ++ intercalate ", " (map fst $ strategies)
                      return st
-  where (REPLState p fp _) = st
+  where (REPLState lang p fp _) = st
 
 -- Exits the environment
 quit :: Command
-quit _ _ = do
-  putStrLn "Goodbye!"
+quit _ st = do
+  putStrLn $ localize lang "goodbye"
   exitSuccess
+  where (REPLState lang _ _ _) = st
 
 -- Outputs the list of commands.
 help :: Command
 help _ st = do
-  putStrLn $ unlines $ "Commands available from the prompt" : map (("  " ++) . describe) commands
+  putStrLn $ unlines $ localize lang "cmdsav" : map (("  " ++) . describe) commands
   return st
   where describe (cmd, argDesc, desc, _) = (':':cmd:' ':argDesc) ++ " " ++ desc
+        (REPLState lang _ _ _) = st
 
 -- Trims whitespace around a string.
 trim :: String -> String
