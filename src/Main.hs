@@ -1,6 +1,9 @@
 module Main where
 
+import GHC.IO.Encoding
 import REPL
 
 main :: IO ()
-main = runREPL
+main = do
+  setLocaleEncoding utf8
+  runREPL
