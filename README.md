@@ -11,3 +11,6 @@ You can try a simple example by loading a Prolog file from the `examples` folder
 :l examples/last.pl
 last([1, 2, 3], X).
 ```
+
+## Testing
+To execute the test suite, run `cabal v2-test`.
