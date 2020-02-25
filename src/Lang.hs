@@ -52,3 +52,18 @@ localizeES str = case str of
   "stratnotav" -> "La estrategia deseada no es disponible! Estrategias disponibles: "
   "goodbye"    -> "Adios!"
   "cmdsav"     -> "Instrucciónes disponibles"
+
+localizePD :: String -> String
+localizePD str = case str of
+  "welcome"    -> "Moin!"
+  "helpAnno"   -> "Tipp \":h\" för Help."
+  "unknowncmd" -> "Dat will nich bottern, Tipp \":h\" för Help."
+  "loaded"     -> "Düchtiges rinladen af "
+  "rule"       -> " Gebode(n)."
+  "nofile"     -> "Dat gifft keene Datei."
+  "nostrat"    -> "Die Vorgahn ward wegmakt. Ick giff di nu den SLD-Boom."
+  "strat"      -> "Folgende Suchstrategie wurde ausgewählt '"
+  "stratnotav" -> "Dat gifft disse Vörgahn nich! Paraate Vörgahn: "
+  "goodbye"    -> "Tschüüs!"
+  "cmdsav"     -> "Paraate Anwiesen"
+  _            -> str
