@@ -140,9 +140,9 @@ setStrat args st | null args = do
 -- Sets the language.
 setLang :: Command
 setLang args st = case lookup args languages of
-  Just lang -> do
-    putStrLn $ localize lang "welcome"
-    return $ REPLState lang p fp strat
+  Just l -> do
+    putStrLn $ localize l "welcome"
+    return $ REPLState l p fp strat
   Nothing   -> do
     putStrLn $ localize lang "langnotfound"
     return st

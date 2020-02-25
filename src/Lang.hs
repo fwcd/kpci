@@ -12,7 +12,7 @@ localize lang = case lang of
   ES -> localizeES
   SE -> localizeSE
   PD -> localizePD
-  _  -> localizeEN
+  -- _  -> localizeEN
 
 localizeEN :: String -> String
 localizeEN str = case str of
