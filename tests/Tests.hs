@@ -1,13 +1,21 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-import Test.QuickCheck
 import System.Exit
+import Test.QuickCheck
 
-prop_simple :: Int -> Bool
-prop_simple x = 1 == 2
+import Subst
+import Type
 
-prop_test :: Bool
-prop_test = 1 == 4
+instance Arbitrary Term where
+  arbitrary = do
+    name <- arbitrary
+    ts <- arbitrary
+    oneof [return $ Var name, return $ Comb name ts]
+
+instance Arbitrary Subst where
+  arbitrary = do
+    ls <- arbitrary
+    return $ Subst ls
 
 return []
 
