@@ -23,3 +23,9 @@ executable kpci
   ghc-options:         -Wall
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+test-suite kpci-tests
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14
+  hs-source-dirs:      tests
