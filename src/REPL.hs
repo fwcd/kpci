@@ -146,7 +146,7 @@ setLang args st = case lookup args languages of
   Nothing   -> do
     putStrLn $ localize lang "langnotfound"
     return st
-  where (REPLState _ p fp strat) = st
+  where (REPLState lang p fp strat) = st
 
 -- Exits the environment
 quit :: Command
