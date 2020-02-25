@@ -10,7 +10,7 @@ localize lang = case lang of
   SE -> localizeSE
   PD -> localizePD
   _  -> localizeEN
-  
+
 localizeEN :: String -> String
 localizeEN str = case str of
   "welcome"    -> "Welcome!"
@@ -24,6 +24,7 @@ localizeEN str = case str of
   "stratnotav" -> "No such strategy available! Try one of these: "
   "goodbye"    -> "Goodbye!"
   "cmdsav"     -> "Commands available from the prompt"
+  _            -> str
 
 localizeDE :: String -> String
 localizeDE str = case str of
@@ -38,7 +39,8 @@ localizeDE str = case str of
   "stratnotav" -> "Gewünschte Strategie ist nicht verfügbar! Verfügbare Strategien: "
   "goodbye"    -> "Auf Wiedersehen!"
   "cmdsav"     -> "Verfügbare Befehle"
-  
+  _            -> str
+
 localizeES :: String -> String
 localizeES str = case str of
   "welcome"    -> "Bienvenido"
@@ -52,6 +54,7 @@ localizeES str = case str of
   "stratnotav" -> "La estrategia deseada no es disponible! Estrategias disponibles: "
   "goodbye"    -> "Adios!"
   "cmdsav"     -> "Instrucciónes disponibles"
+  _            -> str
 
 localizePD :: String -> String
 localizePD str = case str of
