@@ -91,6 +91,7 @@ commands = [('l', "<file>",  "Loads the specified file",           loadFile)
            ,('r', "",        "Reloads the file",                   reloadFile)
            ,('s', "<strat>", "Sets the specified search strategy", setStrat)
            ,('q', "",        "Exits the interactive environment",  quit)
+           ,('t', "<lang>",  "Sets the language",                  setLang)
            ,('h', "",        "Helps",                              help)
            ]
 
@@ -135,6 +136,17 @@ setStrat args st | null args = do
                      putStrLn $ localize lang "stratnotav" ++ intercalate ", " (map fst $ strategies)
                      return st
   where (REPLState lang p fp _) = st
+
+-- Sets the language.
+setLang :: Command
+setLang args st = case lookup args languages of
+  Just lang -> do
+    putStrLn $ localize lang "welcome"
+    return $ REPLState lang p fp strat
+  Nothing   -> do
+    putStrLn $ localize lang "langnotfound"
+    return st
+  where (REPLState _ p fp strat) = st
 
 -- Exits the environment
 quit :: Command
