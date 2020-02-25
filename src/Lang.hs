@@ -70,3 +70,18 @@ localizePD str = case str of
   "goodbye"    -> "Tschüüs!"
   "cmdsav"     -> "Paraate Anwiesen"
   _            -> str
+
+localizeSE :: String -> String
+localizeSE str = case str of
+  "welcome"    -> "Välkommen!"
+  "helpAnno"   -> "Tryck \":h\" för hjälp."
+  "unknowncmd" -> "Inget kommando hittades, tryck \":h\" för hjälp."
+  "loaded"     -> "Laddade "
+  "rule"       -> " regler."
+  "nofile"     -> "Inget fil laddad hittills."
+  "strat"      -> "Väljade strategi "
+  "nostrat"    -> "Avväljade strategi. De nästa förfrågorna kommer at skriva ut hela SLD trädet."
+  "stratnotav" -> "Kunde inte hitta strategin. Ta en av de följande: "
+  "goodbye"    -> "Hej då!"
+  "cmdsav"     -> "Tillgängliga kommandon:"
+  _            -> str
