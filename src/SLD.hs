@@ -1,6 +1,6 @@
 module SLD (SLDTree (..), Strategy, sld, strategies, defaultStrategy, solve) where
 
-import Data.Maybe (maybeToList, listToMaybe, isJust)
+import Data.Maybe (maybeToList)
 import Pretty
 import Rename
 import Subst
@@ -20,20 +20,25 @@ type Strategy = SLDTree -> [Subst]
 sld :: Strategy -> Prog -> Goal -> SLDTree
 sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
-        sld' _      (Goal [])     = SLDTree (Goal []) []
+
+        -- Handle finished case
+        sld' _ (Goal []) = SLDTree (Goal []) []
+
+        -- Handle negation-as-failure
+        sld' used g@(Goal (Comb "\\+" [l]:ls)) | unprovable = sld' used $ Goal ls  -- continue resolution with rest
+                                               | otherwise  = SLDTree g         [] -- fail
+          where unprovable = null $ strat $ sld' used $ Goal [l]
+        
+        -- Handle general case: Pick the next (leftmost) literal from the goal
+        -- and try to unify it with all rules in the program (each rule forms
+        -- a new branch in the SLD tree).
         sld' used g@(Goal (l:ls)) = SLDTree g $ do
           r <- prog
           let (Rule t ts, used') = rename used r
-
           l' <- case l of
-                    (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
-                    (Comb "\\+"  [t'])                -> if isJust $ do s <- unify t' t
-                                                                        listToMaybe $ strat $ sld' used' $ Goal $ apply s <$> ts ++ ls
-                                                           then [l]
-                                                           else []
-                    _                                 -> [l]
+            (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
+            _                                 -> [l]
           s <- maybeToList $ unify l' t
-
           return (s, sld' used' $ Goal $ apply s <$> ts ++ ls)
 
 instance Pretty SLDTree where
