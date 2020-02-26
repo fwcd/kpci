@@ -1,7 +1,6 @@
 module PLTests (runAllPLTests) where
 
 import Control.Monad (unless, void)
-import Data.Either (isRight)
 import Data.List (isPrefixOf)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.Except
@@ -48,13 +47,16 @@ runPrologTest :: FilePath -> IO Bool
 runPrologTest fp = do
   putStrLn $ "=== Prolog test " ++ fp ++ " ==="
   outcome <- runExceptT $ doPrologTest fp
-  case outcome of
+  success <- case outcome of
     Left (msgs, Error e)  -> do void $ mapM putStrLn $ formatMessages msgs
                                 putStrLn $ "Error: " ++ e
-    Left (_, Ignore)      -> putStrLn "Ignored"
-    Right _               -> putStrLn "Success"
+                                return False
+    Left (_, Ignore)      -> do putStrLn "Ignored"
+                                return True
+    Right _               -> do putStrLn "Success"
+                                return True
   putStrLn ""
-  return $ isRight $ outcome
+  return success
 
 -- Runs all Prolog tests.
 runAllPLTests :: IO Bool
