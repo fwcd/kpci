@@ -32,6 +32,6 @@ test-suite kpci-tests
   type:                exitcode-stdio-1.0
   main-is:             TestMain.hs
   other-modules:       PLTests, QCTests, TestUtils
-  build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14, kpci
+  build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14, kpci, filepath < 1.5, directory < 1.4, mtl < 2.3, transformers < 0.6
   ghc-options:         -Wall
   hs-source-dirs:      tests

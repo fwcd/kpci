@@ -1,5 +1,7 @@
-module TestUtils where
+module TestUtils (depth, disjoint, distinctVarCount, liftEither) where
 
+import Control.Monad.Trans.Except
+import Data.Either (either)
 import Data.List (nub)
 
 import Type
@@ -17,3 +19,7 @@ disjoint xs = foldr (\y -> ((not $ elem y xs) &&)) True
 -- Fetches the number of distinct variables in a given term.
 distinctVarCount :: Term -> Int
 distinctVarCount = length . nub . allVars
+
+-- Lifts an either into the ExceptT transformer.
+liftEither :: Monad m => Either a b -> ExceptT a m b
+liftEither = either throwE return
