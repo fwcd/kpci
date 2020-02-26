@@ -33,7 +33,7 @@ To run, you will need `cabal-install`. Once installed, just run `cabal v2-run` t
 You can try a simple example by loading a Prolog file from the `examples/rules` folder and entering a query:
 
 ```
-:l examples/last.pl
+:l examples/rules/last.pl
 last([1, 2, 3], X).
 ```
 
