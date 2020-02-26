@@ -1,3 +1,5 @@
+% IGNORE
+
 append(Xs,Ys,[2,1]), append(Ys,Xs,[1,2]).
 % Expected result: One solution, "{Xs -> [1], Ys -> [2]}".
 % Tests whether the mgu found in a resolution step is applied to the whole goal.
