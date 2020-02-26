@@ -22,8 +22,14 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
         sld' _      (Goal [])     = SLDTree (Goal []) []
         sld' used g@(Goal (l:ls)) = SLDTree g $ do
           r <- prog
+          
+          let l' = case l of
+                    (Comb "call" (Comb p []:args)) -> Comb p args
+                    _                          -> l
+
           let (Rule t ts, used') = rename used r
-          s <- maybeToList $ unify l t
+          s <- maybeToList $ unify l' t
+
           return (s, sld' used' $ Goal $ map (apply s) $ ts ++ ls)
 
 instance Pretty SLDTree where
