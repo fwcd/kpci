@@ -18,4 +18,4 @@ jobs:
     - name: Build
       run: cabal v2-build
     - name: Run tests
-      run: cabal v2-test
+      run: cabal v2-test --show-details always
