@@ -3,7 +3,9 @@ An interactive Prolog interpreter written by Hendrik and Fredrik.
 
 [![CI](https://github.com/fwcd/kpci/workflows/CI/badge.svg)](https://github.com/fwcd/kpci/actions)
 
-The interpreter uses unification, SLD resolution and various tree search algorithm (DFS, BFS, IDDFS) to find a set of solutions given a query. More advanced features that are supported:
+The interpreter uses unification, SLD resolution and various tree search algorithm (DFS, BFS, IDDFS) to find a set of solutions given a query. A more detailed description can be found in [OVERVIEW.md](OVERVIEW.md).
+
+More advanced features that are supported:
 
 * Higher-order predicates (`call`)
 * Negation-as-failure (`\+`)
