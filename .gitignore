@@ -5,3 +5,4 @@ dist-newstyle
 *.ghc.*
 *.swp
 *.kate-swp
+*.project.local*
