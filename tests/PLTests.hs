@@ -1,6 +1,6 @@
 module PLTests (runAllPLTests) where
 
-import Control.Monad (void)
+import Control.Monad (void, unless)
 import Data.Either (isRight)
 import Data.Maybe (maybeToList)
 import Control.Monad.Trans (liftIO)
@@ -33,6 +33,7 @@ doPrologTest fp = do
       outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
       messages  = toMessage <$> outcomes
   liftIO $ void $ mapM putStrLn messages
+  unless (foldr (&&) True $ snd <$> outcomes) $ throwE "Some assertions failed"
   where toMessage (g, b) = pretty g ++ " -> " ++ (if b then "Success" else "Failure")
 
 -- Runs a single Prolog test and possibly outputs the failure message.
