@@ -1,7 +1,7 @@
 module SLD (SLDTree (..), Strategy, sld, strategies, defaultStrategy, solve) where
 
 import Arithmetic
-import Data.Maybe (maybeToList, isJust)
+import Data.Maybe (maybeToList)
 import Pretty
 import Rename
 import Subst
@@ -29,10 +29,10 @@ sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
                                    | otherwise  -> SLDTree g []         -- fail
             where unprovable = null $ strat $ sld' used $ Goal [t]
           -- Handle arithmetic
-          Goal (Comb "is" [t1, t2]:ls) | provable  -> sld' used $ Goal ls  -- continue resolution with rest
-                                       | otherwise -> SLDTree g []         -- fail
-            where provable = isJust $ unify (maybe t1 numTerm $ eval t1) (maybe t2 numTerm $ eval t2)
-                  numTerm n = Comb (show n) []
+          Goal (Comb "is" [t1, t2]:ls) -> case unify (maybe t1 numTerm $ eval t1) (maybe t2 numTerm $ eval t2) of
+            Just s  -> SLDTree g [(s, sld' used $ Goal ls)] -- continue resolution with rest
+            Nothing -> SLDTree g []                         -- fail
+            where numTerm n = Comb (show n) []
           -- Handle general case: Pick the next (leftmost) literal from the goal
           -- and try to unify it with all rules in the program (each rule forms
           -- a new branch in the SLD tree).
