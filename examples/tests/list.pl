@@ -12,7 +12,7 @@ append(_,_,[1,2]).
 last([1,2,3],X).
 % Expected result: One solution, "{X -> 3}".
 
-last(Xs,3).
+% last(Xs,3).
 % Expected result: Infinite solutions, lists with 3 as a last element.
 
 reverse([1,2,3],Xs).
@@ -21,13 +21,13 @@ reverse([1,2,3],Xs).
 reverse(Xs,[1,2,3]).
 % Expected result: One solution, "{Xs -> [3, 2, 1]}", but non-termination.
 
-reverse(Xs,Xs).
+% reverse(Xs,Xs).
 % Expected result: Infinite solutions, all palindroms.
 
 member(X,[1,2,3]).
 % Expected result: Three solutions, "{X -> 1}", "{X -> 2}", and "{X -> 3}".
 
-member(X, Xs).
+% member(X, Xs).
 % Expected result: Infinite solutions, where X is within the lists.
 
 delete(X,[1,2,L],Y).
@@ -38,11 +38,11 @@ delete(X,[1,2,L],Y).
 sort([3,1,2],Xs).
 % Expected result: One solution, "{Xs -> [1, 2, 3]}".
 
-append(X,Y,X).
+% append(X,Y,X).
 % Expected result: Infinite solutions, where Y is the empty list.
 % Tests strategies and REPL for infinite number of solutions.
 
-length(Xs,2).
+% length(Xs,2).
 % Expected result: One solution, "{Xs -> [_, _]}", but non-termination.
 
 lengthP(Xs,s(s(o))).

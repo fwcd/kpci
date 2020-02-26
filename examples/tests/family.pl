@@ -1,3 +1,5 @@
+% IGNORE
+
 % vorfahre(X,Y).
 % Expected result (with dfs): No solutions and non-termination.
 % Expected result (with bfs or iddfs): Multiple solutions, but still
