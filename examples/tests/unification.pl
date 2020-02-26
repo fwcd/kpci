@@ -1,3 +1,5 @@
+% IGNORE
+
 =(A,B).
 % Expected result: One solution, "{A -> B}" or some equivalent solution.
 

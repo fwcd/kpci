@@ -1,4 +1,4 @@
-module TestUtils (depth, disjoint, distinctVarCount, trim, liftEither) where
+module TestUtils (depth, disjoint, distinctVarCount, trim, liftEither, mapLeft) where
 
 import Control.Monad.Trans.Except
 import Data.Either (either)
@@ -28,3 +28,8 @@ trim = t . t
 -- Lifts an either into the ExceptT transformer.
 liftEither :: Monad m => Either a b -> ExceptT a m b
 liftEither = either throwE return
+
+-- Maps over the error case in an Either.
+mapLeft :: (a -> b) -> Either a c -> Either b c
+mapLeft f (Left e)  = Left $ f e
+mapLeft _ (Right x) = Right x

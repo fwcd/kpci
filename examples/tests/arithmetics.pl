@@ -1,3 +1,5 @@
+% IGNORE
+
 is(42,+(21,21)).
 % Expected result: One solution, "{}".
 
