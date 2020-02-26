@@ -1,6 +1,6 @@
 module PLTests (runAllPLTests) where
 
-import Control.Monad (void, unless)
+import Control.Monad (unless, void)
 import Data.Either (isRight)
 import Data.List (isPrefixOf)
 import Control.Monad.Trans (liftIO)
@@ -34,14 +34,13 @@ parseTestFile fp = do
 -- Runs the Prolog test at the given path. The
 -- associated rule file is expected to be located
 -- in a sibling directory called 'rules'.
-doPrologTest :: FilePath -> ExceptT ParseExcept IO ()
+doPrologTest :: FilePath -> ExceptT ([String], ParseExcept) IO ()
 doPrologTest fp = do
-  testGoals <- parseTestFile fp
-  ruleProg  <- ExceptT $ mapLeft Error <$> (parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
+  testGoals <- ExceptT $ mapLeft (pair [])         <$> (runExceptT $ parseTestFile fp)
+  ruleProg  <- ExceptT $ mapLeft (pair [] . Error) <$> (parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
   let outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
       messages  = toMessage <$> outcomes
-  liftIO $ void $ mapM putStrLn messages
-  unless (foldr (&&) True $ snd <$> outcomes) $ throwE $ Error "Some assertions failed"
+  unless (foldr (&&) True $ snd <$> outcomes) $ throwE (messages, Error "Some assertions failed")
   where toMessage (g, b) = pretty g ++ " -> " ++ (if b then "Success" else "Failure")
 
 -- Runs a single Prolog test and possibly outputs the failure message.
@@ -49,10 +48,11 @@ runPrologTest :: FilePath -> IO Bool
 runPrologTest fp = do
   putStrLn $ "=== Prolog test " ++ fp ++ " ==="
   outcome <- runExceptT $ doPrologTest fp
-  putStrLn $ case outcome of
-    Left (Error e)  -> "Error: " ++ e
-    Left Ignore     -> "Ignored"
-    Right _         -> "Success"
+  case outcome of
+    Left (msgs, Error e)  -> do void $ mapM putStrLn msgs
+                                putStrLn $ "Error: " ++ e
+    Left (_, Ignore)      -> putStrLn "Ignored"
+    Right _               -> putStrLn "Success"
   putStrLn ""
   return $ isRight $ outcome
 

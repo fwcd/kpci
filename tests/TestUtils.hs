@@ -1,4 +1,4 @@
-module TestUtils (depth, disjoint, distinctVarCount, trim, liftEither, mapLeft) where
+module TestUtils (depth, disjoint, distinctVarCount, trim, liftEither, mapLeft, pair) where
 
 import Control.Monad.Trans.Except
 import Data.Either (either)
@@ -33,3 +33,7 @@ liftEither = either throwE return
 mapLeft :: (a -> b) -> Either a c -> Either b c
 mapLeft f (Left e)  = Left $ f e
 mapLeft _ (Right x) = Right x
+
+-- Creates a 2-tuple.
+pair :: a -> b -> (a, b)
+pair x y = (x, y)
