@@ -25,7 +25,7 @@ sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
           
           let l' = case l of
                     (Comb "call" (Comb p []:args)) -> Comb p args
-                    _                          -> l
+                    _                              -> l
 
           let (Rule t ts, used') = rename used r
           s <- maybeToList $ unify l' t
