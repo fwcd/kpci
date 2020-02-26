@@ -17,7 +17,12 @@ import Type
 parseTestFile :: FilePath -> ExceptT String IO [Goal]
 parseTestFile fp = do
   raw <- liftIO $ readFile fp
-  liftEither $ mapM parse $ lines raw
+  liftEither $ mapM parse
+             $ filter (not . isComment)
+             $ filter (not . null)
+             $ trim <$> lines raw
+  where isComment ('%':_) = True
+        isComment _       = False
 
 -- Runs the Prolog test at the given path. The
 -- associated rule file is expected to be located
