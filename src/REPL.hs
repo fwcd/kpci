@@ -78,7 +78,7 @@ evaluateGoal input st = do case parse input of
                              Left e -> putStrLn e
                              Right g -> case strat of
                                Just s  -> putStrLn $ unlines $ map pretty $ solve s p g
-                               Nothing -> putStrLn $ pretty $ sld p g
+                               Nothing -> putStrLn $ pretty $ sld defaultStrategy p g
                            return st
   where (REPLState _ p _ strat) = st
 

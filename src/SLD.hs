@@ -16,16 +16,19 @@ data SLDTree = SLDTree Goal [(Subst, SLDTree)]
 type Strategy = SLDTree -> [Subst]
 
 -- Constructs an SLD tree from a program and a query.
-sld :: Prog -> Goal -> SLDTree
-sld (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
+-- The strategy is needed for the negation-as-failure operator.
+sld :: Strategy -> Prog -> Goal -> SLDTree
+sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
         sld' _      (Goal [])     = SLDTree (Goal []) []
         sld' used g@(Goal (l:ls)) = SLDTree g $ do
           r <- prog
-          
-          let l' = case l of
-                    (Comb "call" (Comb p []:args)) -> Comb p args
-                    _                              -> l
+          l' <- case l of
+                    (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
+                    (Comb "\\+"  [t])                 -> if True -- TODO
+                                                           then [l]
+                                                           else []
+                    _                                 -> [l]
 
           let (Rule t ts, used') = rename used r
           s <- maybeToList $ unify l' t
@@ -98,5 +101,5 @@ defaultStrategy = dfs
 
 -- Solves a goal using a program and a strategy.
 solve :: Strategy -> Prog -> Goal -> [Subst]
-solve strat p g@(Goal ls) = map (\(Subst subs) -> Subst $ filter (flip elem vs . fst) subs) $ strat $ sld p g
+solve strat p g@(Goal ls) = map (\(Subst subs) -> Subst $ filter (flip elem vs . fst) subs) $ strat $ sld strat p g
   where vs = ls >>= allVars
