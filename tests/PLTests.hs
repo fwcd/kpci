@@ -5,7 +5,7 @@ import Data.Either (isRight)
 import Data.Maybe (maybeToList)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.Except
-import System.FilePath ((</>), takeFileName)
+import System.FilePath ((</>), takeFileName, takeDirectory)
 import System.Directory (listDirectory)
 
 import Parser
@@ -28,7 +28,7 @@ progToGoals (Prog rs) = rs >>= (maybeToList . ruleToGoal)
 doPrologTest :: FilePath -> ExceptT String IO ()
 doPrologTest fp = do
   testProg <- liftEither =<< (liftIO $ parseFile fp)
-  ruleProg <- liftEither =<< (liftIO $ parseFile $ fp </> ".." </> "rules" </> takeFileName fp)
+  ruleProg <- liftEither =<< (liftIO $ parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
   let testGoals = progToGoals testProg
       outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
       messages  = toMessage <$> outcomes
@@ -49,6 +49,7 @@ runPrologTest fp = do
 -- Runs all Prolog tests.
 runAllPLTests :: IO Bool
 runAllPLTests = do
-  contents <- listDirectory "examples/tests" -- TODO: Do not depend on PWD
+  let dir = "examples/tests"
+  contents <- ((dir </>) <$>) <$> listDirectory dir -- TODO: Do not depend on PWD
   passes <- mapM runPrologTest contents
   return $ foldr (&&) True passes
