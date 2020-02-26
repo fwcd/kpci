@@ -15,23 +15,23 @@ extra-source-files:  README.md
 data-files:          resources/kpcilogo.txt
 cabal-version:       >=1.10
 
-library kpci-lib
+library
   exposed-modules:     Lang, Parser, Pretty, REPL, Rename, SLD, State, Subst, Type, Unification, Vars, Paths_kpci
   build-depends:       base >= 4.9 && < 5, parsec < 3.2, haskeline < 0.9, mtl < 2.3
   ghc-options:         -Wall
   hs-source-dirs:      src
   default-language:    Haskell2010
 
-executable kpci
+executable kpci-exe
   main-is:             Main.hs
-  build-depends:       kpci-lib, base >= 4.9 && < 5
+  build-depends:       kpci, base >= 4.9 && < 5
   ghc-options:         -Wall
   hs-source-dirs:      app
 
 test-suite kpci-tests
   type:                exitcode-stdio-1.0
-  main-is:             Tests.hs
-  other-modules:       Arbitraries, TestUtils
-  build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14, kpci-lib
+  main-is:             TestMain.hs
+  other-modules:       PLTests, QCTests, TestUtils
+  build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14, kpci
   ghc-options:         -Wall
   hs-source-dirs:      tests

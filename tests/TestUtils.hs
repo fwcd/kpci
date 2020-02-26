@@ -2,7 +2,6 @@ module TestUtils where
 
 import Data.List (nub)
 
-import Subst
 import Type
 import Vars
 
