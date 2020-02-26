@@ -2,7 +2,6 @@ module PLTests (runAllPLTests) where
 
 import Control.Monad (void, unless)
 import Data.Either (isRight)
-import Data.Maybe (maybeToList)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.Except
 import System.FilePath ((</>), takeFileName, takeDirectory)
@@ -14,23 +13,20 @@ import SLD
 import TestUtils
 import Type
 
--- Extracts a list of goals from a test program.
--- This means, the program is not interpreted as
--- a list of rules, but instead as a list of goals/queries.
-progToGoals :: Prog -> [Goal]
-progToGoals (Prog rs) = rs >>= (maybeToList . ruleToGoal)
-  where ruleToGoal (Rule t []) = Just $ Goal [t]
-        ruleToGoal _           = Nothing
+-- Parses a list of goals from a file.
+parseTestFile :: FilePath -> ExceptT String IO [Goal]
+parseTestFile fp = do
+  raw <- liftIO $ readFile fp
+  liftEither $ mapM parse $ lines raw
 
 -- Runs the Prolog test at the given path. The
 -- associated rule file is expected to be located
 -- in a sibling directory called 'rules'.
 doPrologTest :: FilePath -> ExceptT String IO ()
 doPrologTest fp = do
-  testProg <- liftEither =<< (liftIO $ parseFile fp)
-  ruleProg <- liftEither =<< (liftIO $ parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
-  let testGoals = progToGoals testProg
-      outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
+  testGoals <- parseTestFile fp
+  ruleProg  <- liftEither =<< (liftIO $ parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
+  let outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
       messages  = toMessage <$> outcomes
   liftIO $ void $ mapM putStrLn messages
   unless (foldr (&&) True $ snd <$> outcomes) $ throwE "Some assertions failed"
