@@ -1,6 +1,7 @@
 module SLD (SLDTree (..), Strategy, sld, strategies, defaultStrategy, solve) where
 
-import Data.Maybe (maybeToList)
+import Arithmetic
+import Data.Maybe (maybeToList, isJust)
 import Pretty
 import Rename
 import Subst
@@ -20,26 +21,29 @@ type Strategy = SLDTree -> [Subst]
 sld :: Strategy -> Prog -> Goal -> SLDTree
 sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
   where sld' :: [VarName] -> Goal -> SLDTree
-
-        -- Handle finished case
-        sld' _ (Goal []) = SLDTree (Goal []) []
-
-        -- Handle negation-as-failure
-        sld' used g@(Goal (Comb "\\+" [l]:ls)) | unprovable = sld' used $ Goal ls  -- continue resolution with rest
-                                               | otherwise  = SLDTree g         [] -- fail
-          where unprovable = null $ strat $ sld' used $ Goal [l]
-        
-        -- Handle general case: Pick the next (leftmost) literal from the goal
-        -- and try to unify it with all rules in the program (each rule forms
-        -- a new branch in the SLD tree).
-        sld' used g@(Goal (l:ls)) = SLDTree g $ do
-          r <- prog
-          let (Rule t ts, used') = rename used r
-          l' <- case l of
-            (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
-            _                                 -> [l]
-          s <- maybeToList $ unify l' t
-          return (s, sld' used' $ Goal $ apply s <$> ts ++ ls)
+        sld' used g = case g of
+          -- Handle finished case
+          Goal [] -> SLDTree (Goal []) []
+          -- Handle negation-as-failure
+          Goal (Comb "\\+" [t]:ls) | unprovable -> sld' used $ Goal ls  -- continue resolution with rest
+                                   | otherwise  -> SLDTree g []         -- fail
+            where unprovable = null $ strat $ sld' used $ Goal [t]
+          -- Handle arithmetic
+          Goal (Comb "is" [t1, t2]:ls) | provable  -> sld' used $ Goal ls  -- continue resolution with rest
+                                       | otherwise -> SLDTree g []         -- fail
+            where provable = isJust $ unify (maybe t1 numTerm $ eval t1) (maybe t2 numTerm $ eval t2)
+                  numTerm n = Comb (show n) []
+          -- Handle general case: Pick the next (leftmost) literal from the goal
+          -- and try to unify it with all rules in the program (each rule forms
+          -- a new branch in the SLD tree).
+          Goal (l:ls) -> SLDTree g $ do
+            r <- prog
+            let (Rule t ts, used') = rename used r
+            l' <- case l of
+              (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
+              _                                 -> [l]
+            s <- maybeToList $ unify l' t
+            return (s, sld' used' $ Goal $ apply s <$> ts ++ ls)
 
 instance Pretty SLDTree where
   pretty = unlines . pretty'

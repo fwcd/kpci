@@ -9,10 +9,10 @@ More advanced features that are supported:
 
 * Higher-order predicates (`call`)
 * Negation-as-failure (`\+`)
+* Arithmetic (`is`)
 
 Not implemented yet:
 
-* Arithmetic (`is`)
 * Encapsulation of nondeterminism (`findall`)
 
 ## Project Structure

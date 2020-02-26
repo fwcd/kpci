@@ -16,7 +16,7 @@ data-files:          resources/kpcilogo.txt
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Lang, Parser, Pretty, REPL, Rename, SLD, State, Subst, Type, Unification, Vars, Paths_kpci
+  exposed-modules:     Arithmetic, Lang, Parser, Pretty, REPL, Rename, SLD, State, Subst, Type, Unification, Vars, Paths_kpci
   build-depends:       base >= 4.9 && < 5, parsec < 3.2, haskeline < 0.9, mtl < 2.3
   ghc-options:         -Wall
   hs-source-dirs:      src
