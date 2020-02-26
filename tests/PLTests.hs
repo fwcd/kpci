@@ -34,14 +34,14 @@ parseTestFile fp = do
 -- Runs the Prolog test at the given path. The
 -- associated rule file is expected to be located
 -- in a sibling directory called 'rules'.
-doPrologTest :: FilePath -> ExceptT ([String], ParseExcept) IO ()
+doPrologTest :: FilePath -> ExceptT ([(String, String)], ParseExcept) IO ()
 doPrologTest fp = do
   testGoals <- ExceptT $ mapLeft (pair [])         <$> (runExceptT $ parseTestFile fp)
   ruleProg  <- ExceptT $ mapLeft (pair [] . Error) <$> (parseFile $ (takeDirectory . takeDirectory) fp </> "rules" </> takeFileName fp)
   let outcomes  = zip testGoals $ not <$> null <$> solve defaultStrategy ruleProg <$> testGoals
       messages  = toMessage <$> outcomes
   unless (foldr (&&) True $ snd <$> outcomes) $ throwE (messages, Error "Some assertions failed")
-  where toMessage (g, b) = pretty g ++ " -> " ++ (if b then "Success" else "Failure")
+  where toMessage (g, b) = (pretty g, if b then "+" else "FAILURE")
 
 -- Runs a single Prolog test and possibly outputs the failure message.
 runPrologTest :: FilePath -> IO Bool
@@ -49,7 +49,7 @@ runPrologTest fp = do
   putStrLn $ "=== Prolog test " ++ fp ++ " ==="
   outcome <- runExceptT $ doPrologTest fp
   case outcome of
-    Left (msgs, Error e)  -> do void $ mapM putStrLn msgs
+    Left (msgs, Error e)  -> do void $ mapM putStrLn $ formatMessages msgs
                                 putStrLn $ "Error: " ++ e
     Left (_, Ignore)      -> putStrLn "Ignored"
     Right _               -> putStrLn "Success"
