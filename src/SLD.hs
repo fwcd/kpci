@@ -29,7 +29,7 @@ sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
                                    | otherwise  -> SLDTree g []         -- fail
             where unprovable = null $ strat $ sld' used $ Goal [t]
           -- Handle arithmetic
-          Goal (Comb "is" [t1, t2]:ls) -> case unify (maybe t1 numTerm $ eval t1) (maybe t2 numTerm $ eval t2) of
+          Goal (Comb "is" [t1, t2]:ls) -> case unify (maybe t1 numTerm $ rightToMaybe $ eval t1) (maybe t2 numTerm $ rightToMaybe $ eval t2) of
             Just s  -> SLDTree g [(s, sld' used $ Goal ls)] -- continue resolution with rest
             Nothing -> SLDTree g []                         -- fail
             where numTerm n = Comb (show n) []
@@ -113,3 +113,8 @@ defaultStrategy = dfs
 solve :: Strategy -> Prog -> Goal -> [Subst]
 solve strat p g@(Goal ls) = map (\(Subst subs) -> Subst $ filter (flip elem vs . fst) subs) $ strat $ sld strat p g
   where vs = ls >>= allVars
+
+-- Converts an either value to a maybe value.
+rightToMaybe :: Either a b -> Maybe b
+rightToMaybe (Left _) = Nothing
+rightToMaybe (Right x) = Just x
