@@ -13,7 +13,11 @@ eval :: Term -> Maybe Integer
 eval (Comb "+" ts)   = foldr (+) 0 <$> mapM eval ts
 eval (Comb "*" ts)   = foldr (*) 1 <$> mapM eval ts
 eval (Comb "-" ts)   = foldl1Safe (-) =<< mapM eval ts
-eval (Comb "div" ts) = foldl1Safe div =<< mapM eval ts
-eval (Comb "mod" ts) = foldl1Safe mod =<< mapM eval ts
+eval (Comb "div" ts) = do es <- mapM eval ts
+                          if elem 0 $ tail es then Nothing
+                                              else foldl1Safe div es
+eval (Comb "mod" ts) = do es <- mapM eval ts
+                          if elem 0 $ tail es then Nothing
+                                              else foldl1Safe mod es
 eval (Comb value _)  = readMaybe value
 eval _               = Nothing

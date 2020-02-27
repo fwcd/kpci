@@ -29,7 +29,7 @@ sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
                                    | otherwise  -> SLDTree g []         -- fail
             where unprovable = null $ strat $ sld' used $ Goal [t]
           -- Handle arithmetic
-          Goal (Comb "is" [t1, t2]:ls) -> case unify (maybe t1 numTerm $ eval t1) (maybe t2 numTerm $ eval t2) of
+          Goal (Comb "is" [t1, t2]:ls) -> case unify t1 =<< (numTerm <$> eval t2) of
             Just s  -> SLDTree g [(s, sld' used $ Goal ls)] -- continue resolution with rest
             Nothing -> SLDTree g []                         -- fail
             where numTerm n = Comb (show n) []
