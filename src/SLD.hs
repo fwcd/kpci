@@ -40,8 +40,8 @@ sld strat (Prog prog) (Goal goal) = sld' (goal >>= allVars) (Goal goal)
             r <- prog
             let (Rule t ts, used') = rename used r
             l' <- case l of
-              (Comb "call" (Comb p args:args')) -> [Comb p $ args ++ args']
-              _                                 -> [l]
+              (Comb "call" (Comb p args : args')) -> [Comb p $ args ++ args']
+              _                                   -> [l]
             s <- maybeToList $ unify l' t
             return (s, sld' used' $ Goal $ apply s <$> ts ++ ls)
 
