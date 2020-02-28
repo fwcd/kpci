@@ -61,7 +61,7 @@ runPrologTest fp = do
 -- Runs all Prolog tests.
 runAllPLTests :: IO Bool
 runAllPLTests = do
-  let dir = "examples/tests"
+  let dir = "examples" </> "tests"
   contents <- ((dir </>) <$>) <$> listDirectory dir -- TODO: Do not depend on PWD
   passes <- mapM runPrologTest contents
   return $ foldr (&&) True passes
