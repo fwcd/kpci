@@ -27,6 +27,7 @@ executable kpci
   build-depends:       kpci, base >= 4.9 && < 5
   ghc-options:         -Wall
   hs-source-dirs:      app
+  default-language:    Haskell2010
 
 test-suite kpci-tests
   type:                exitcode-stdio-1.0
@@ -35,3 +36,4 @@ test-suite kpci-tests
   build-depends:       base >= 4.9 && < 5, QuickCheck < 2.14, kpci, filepath < 1.5, directory < 1.4, mtl < 2.3, transformers < 0.6
   ghc-options:         -Wall
   hs-source-dirs:      tests
+  default-language:    Haskell2010
