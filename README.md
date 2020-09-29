@@ -1,7 +1,8 @@
 # The Kiel Prolog Compiler Interactive
-An interactive Prolog interpreter written by Hendrik and Fredrik.
 
 [![CI](https://github.com/fwcd/kpci/workflows/CI/badge.svg)](https://github.com/fwcd/kpci/actions)
+
+An interactive Prolog interpreter written by Hendrik and Fredrik.
 
 The interpreter uses unification, SLD resolution and various tree search algorithm (DFS, BFS, IDDFS) to find a set of solutions given a query. A more detailed description can be found in [OVERVIEW.md](OVERVIEW.md).
 
